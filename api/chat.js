@@ -1,11 +1,9 @@
 import { GoogleGenAI } from '@google/genai';
-import fs from 'fs';
-import path from 'path';
 
-// Vercel automatically injects your GEMINI_API_KEY environment variable here
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export default async function handler(req, res) {
+    // 1. Catch bad methods early
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
@@ -13,12 +11,21 @@ export default async function handler(req, res) {
     try {
         const { conversationHistory } = req.body;
 
-        // 1. Locate and read the PDF file from the 'public' directory
-        const filePath = path.join(process.cwd(), 'public', 'form_b101.pdf');
-        const pdfBuffer = fs.readFileSync(filePath);
-        const pdfBase64 = pdfBuffer.toString('base64');
+        // 2. The Fix: Fetch the PDF from your own live Vercel domain
+        // This avoids Vercel's local file system restrictions entirely.
+        const protocol = req.headers['x-forwarded-proto'] || 'http';
+        const host = req.headers.host;
+        const pdfUrl = `${protocol}://${host}/form_b101.pdf`;
+        
+        const pdfResponse = await fetch(pdfUrl);
+        if (!pdfResponse.ok) {
+            throw new Error(`Failed to fetch PDF from ${pdfUrl}`);
+        }
+        
+        const arrayBuffer = await pdfResponse.arrayBuffer();
+        const pdfBase64 = Buffer.from(arrayBuffer).toString('base64');
 
-        // 2. Inject the PDF into the system instruction (the first message in the history)
+        // 3. Inject the PDF into the system instruction
         const contents = [...conversationHistory];
         contents[0] = {
             role: 'user',
@@ -33,17 +40,18 @@ export default async function handler(req, res) {
             ]
         };
 
-        // 3. Call Gemini
+        // 4. Call Gemini
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview', 
             contents: contents,
         });
 
-        // 4. Return the AI's text to the frontend
+        // 5. Send successful JSON back to the frontend
         res.status(200).json({ reply: response.text });
 
     } catch (error) {
-        console.error("Server Error:", error);
+        console.error("Server Error Details:", error);
+        // Explicitly return a JSON error so the frontend parser doesn't crash
         res.status(500).json({ error: 'Failed to process request on the server.' });
     }
 }

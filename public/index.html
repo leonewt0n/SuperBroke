@@ -29,6 +29,12 @@
             align-items: center; 
         }
         
+        .header-links {
+            margin-left: auto;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
         .header h1 { font-size: 1.5rem; color: var(--brand-dark); }
         .header p { font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.25rem; }
         
@@ -81,7 +87,11 @@
                 <h1>SuperBroke</h1>
                 <p>DIY Bankruptcy...but with AI powered Attorneys.</p>
             </div>
-            <a href="market.html" class="market-link-btn">Find an Attorney</a>
+            <div class="header-links">
+                <a href="market.html" class="market-link-btn">Find an Attorney</a>
+                <a href="https://www.pay.gov/public/form/start/808852929" class="market-link-btn">Pay Filling Fee</a>
+                <a href="https://www.wawb.uscourts.gov/content/electronic-filing-option-parties-without-attorney" class="market-link-btn">eFile</a>
+            </div>
         </div>
         <div class="pdf-wrapper">
             <embed src="form_b101.pdf" type="application/pdf" />

@@ -79,7 +79,10 @@
         let conversationHistory = [
             {
                 role: "user",
-                parts: [{ text: "System Instruction: You are a helpful legal AI assistant. Do not provide formal legal advice, but explain terminology clearly based on the attached PDF document." }]
+                parts: [
+                    { text: "System Instruction: You are a helpful legal AI assistant. Your goal is to help users understand Official Form 101. Do not provide formal legal advice, but explain terminology clearly based on the attached PDF document." }
+                    // We will inject the PDF data here once it loads
+                ]
             },
             {
                 role: "model",
@@ -100,6 +103,38 @@
             chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight; 
         }
 
+        // Helper function to convert the PDF to base64
+        async function loadPdfIntoMemory() {
+            try {
+                sendBtn.disabled = true;
+                chatInput.placeholder = "Loading PDF into AI memory...";
+
+                const response = await fetch('form_b101.pdf');
+                const blob = await response.blob();
+                
+                // Convert blob to base64
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => {
+                    const base64data = reader.result.split(',')[1];
+                    
+                    // Attach the PDF to the first instruction message
+                    conversationHistory[0].parts.push({
+                        inlineData: {
+                            data: base64data,
+                            mimeType: 'application/pdf'
+                        }
+                    });
+
+                    chatInput.placeholder = "Ask a question about the form...";
+                    sendBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error("Failed to load PDF:", error);
+                chatInput.placeholder = "Failed to load PDF context.";
+            }
+        }
+
         async function sendMessage() {
             const text = chatInput.value.trim();
             if (!text) return;
@@ -113,7 +148,6 @@
             conversationHistory.push({ role: "user", parts: [{ text: text }] });
 
             try {
-                // Call our Vercel Serverless Function
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -122,7 +156,10 @@
                 
                 const data = await response.json();
                 
-                if (data.error) throw new Error(data.error);
+                // Explicitly check for the HTML error payload
+                if (!response.ok) {
+                    throw new Error(data.error || "Server returned an error");
+                }
 
                 // Update UI and State with AI response
                 appendMessage(data.reply, 'ai');
@@ -131,6 +168,8 @@
             } catch (error) {
                 console.error(error);
                 appendMessage("Sorry, I encountered an error talking to the server.", 'ai');
+                // Remove the failed user message from history so they can try again
+                conversationHistory.pop(); 
             } finally {
                 sendBtn.disabled = false;
                 chatInput.focus();
@@ -139,8 +178,11 @@
 
         sendBtn.addEventListener('click', sendMessage);
         chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
+            if (e.key === 'Enter' && !sendBtn.disabled) sendMessage();
         });
+
+        // Load the PDF into memory as soon as the page loads
+        window.addEventListener('DOMContentLoaded', loadPdfIntoMemory);
     </script>
 </body>
 </html>

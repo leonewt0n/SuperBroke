@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bankruptcy Guide – SuperBroke</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --bg-panel: #ffffff;
+            --brand-dark: #0f172a;
+            --accent-blue: #2563eb;
+            --text-primary: #334155;
+            --text-secondary: #64748b;
+            --border-light: #e2e8f0;
+            --success-green: #059669;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            display: flex;
+        }
+
+        .sidebar {
+            width: min(290px, 100vw);
+            min-width: 260px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            align-self: flex-start;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 1.25rem 1.25rem 1rem;
+            background-color: var(--brand-dark);
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-header p {
+            font-size: 0.78rem;
+            color: #cbd5e1;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .sidebar-header a.home-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #93c5fd;
+            text-decoration: none;
+        }
+
+        .sidebar-header a.home-link:hover { color: #fff; text-decoration: underline; }
+
+        .search-wrap {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-light);
+            background: #f1f5f9;
+            flex-shrink: 0;
+        }
+
+        .search-wrap label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        #guideSearch {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            outline: none;
+            background: var(--bg-panel);
+            color: var(--brand-dark);
+        }
+
+        #guideSearch:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .nav-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.75rem;
+        }
+
+        .nav-section {
+            list-style: none;
+        }
+
+        .nav-section li { margin-bottom: 2px; }
+
+        .nav-section a {
+            display: block;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-decoration: none;
+            border: 1px solid transparent;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .nav-section a:hover {
+            background: #f8fafc;
+            border-color: var(--border-light);
+        }
+
+        .nav-section a:focus-visible {
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
+        }
+
+        .nav-section a.hidden { display: none; }
+
+        .nav-section li.no-results {
+            padding: 12px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .nav-section li.no-results.hidden { display: none; }
+
+        .main-area {
+            flex: 1;
+            min-width: 0;
+            padding: 1.5rem 2rem 3rem;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        .main-header {
+            margin-bottom: 1.75rem;
+        }
+
+        .main-header h2 {
+            font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+            color: var(--brand-dark);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .main-header .lede {
+            margin-top: 0.5rem;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 56ch;
+            line-height: 1.55;
+        }
+
+        article.guide-section {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            padding: 1.35rem 1.5rem 1.5rem;
+            margin-bottom: 1.25rem;
+            scroll-margin-top: 1rem;
+        }
+
+        article.guide-section.hidden { display: none; }
+
+        article.guide-section h3 {
+            font-size: 1.125rem;
+            color: var(--brand-dark);
+            margin-bottom: 0.85rem;
+            font-weight: 600;
+        }
+
+        article.guide-section p {
+            font-size: 0.9375rem;
+            line-height: 1.65;
+            margin-bottom: 0.85rem;
+        }
+
+        article.guide-section p:last-child { margin-bottom: 0; }
+
+        article.guide-section ul {
+            margin: 0 0 0.85rem 1rem;
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        article.guide-section li { margin-bottom: 0.4rem; }
+
+        .callout {
+            border-left: 4px solid var(--accent-blue);
+            background: #eff6ff;
+            padding: 12px 14px;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.875rem;
+            line-height: 1.55;
+            color: var(--text-primary);
+            margin-top: 0.75rem;
+        }
+
+        article.guide-section.disclaimer-callout {
+            border-left: 4px solid #94a3b8;
+            background: #f1f5f9;
+        }
+
+        article.guide-section.disclaimer-callout p {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        article.guide-section.disclaimer-callout h3 {
+            color: var(--text-primary);
+        }
+
+        .actions {
+            margin-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .market-link-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--bg-panel);
+            color: var(--accent-blue);
+            text-decoration: none;
+            border: 2px solid var(--accent-blue);
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .market-link-btn:hover {
+            background-color: var(--accent-blue);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+        }
+
+        @media (max-width: 800px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                min-width: 0;
+                position: relative;
+                height: auto;
+                max-height: 45vh;
+                border-right: none;
+                border-bottom: 1px solid var(--border-light);
+            }
+            .main-area {
+                height: auto;
+                min-height: 55vh;
+                padding: 1.25rem 1rem 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar" aria-label="Guide navigation">
+        <div class="sidebar-header">
+            <h1>Bankruptcy Basics</h1>
+            <p>A plain-language roadmap for DIY filers.</p>
+            <a href="index.html" class="home-link">← Back to SuperBroke</a>
+        </div>
+        <div class="search-wrap">
+            <label for="guideSearch">Search this guide</label>
+            <input type="search" id="guideSearch" placeholder="e.g. means test, 341..." autocomplete="off" spellcheck="false" />
+        </div>
+        <nav class="nav-scroll" aria-label="Sections">
+            <ul class="nav-section" id="navList">
+                <li><a href="#overview" data-keywords="overview introduction what is bankruptcy">Overview</a></li>
+                <li><a href="#chapters" data-keywords="chapter 7 chapter 13 liquidation repayment plan trustee">Chapter 7 &amp; 13</a></li>
+                <li><a href="#before-you-file" data-keywords="credit counseling means test paperwork documents creditors">Before you file</a></li>
+                <li><a href="#filing-process" data-keywords="petition schedules forms filing fee clerk court automatic stay">Filing &amp; the automatic stay</a></li>
+                <li><a href="#after-filing" data-keywords="341 meeting trustee discharge financial management course reaffirm">341 meeting &amp; discharge</a></li>
+                <li><a href="#misconceptions" data-keywords="myth secrets debt assets keep car home mistake">Common misconceptions</a></li>
+                <li><a href="#disclaimer" data-keywords="disclaimer lawyer attorney legal advice not lawyer">Disclaimer</a></li>
+                <li class="no-results hidden" id="navNoResults">No sections match.</li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-area" id="mainContent">
+        <header class="main-header">
+            <h2>Simple bankruptcy guide</h2>
+            <p class="lede">
+                Bankruptcy is a federal legal process designed to give people relief from debts they cannot reasonably repay.
+                This page orients you on common terms and steps—not a substitute for reading your court’s instructions or talking to an attorney when you’re unsure.
+            </p>
+        </header>
+
+        <article id="overview" class="guide-section" data-keywords="overview introduction what is bankruptcy fresh start debtor relief creditor federal judge trustee">
+            <h3>Overview</h3>
+            <p>
+                Individuals usually file either <strong>Chapter 7</strong> (liquidation-focused, often resolves quickly) or
+                <strong>Chapter 13</strong> (a court-approved repayment plan over several years).
+                Courts apply federal rules plus local procedures; expectations can vary slightly by district.
+            </p>
+            <p>
+                Filing formally starts your case with the bankruptcy court and creates important rights and deadlines.
+                Accuracy and completeness on schedules (lists of debts, assets, income, etc.) matters because those forms are signed under penalty of perjury.
+            </p>
+        </article>
+
+        <article id="chapters" class="guide-section" data-keywords="chapter 7 chapter 13 liquidation repayment plan trustee income assets secured debt unsecured">
+            <h3>Chapter 7 &amp; 13 (quick comparison)</h3>
+            <ul>
+                <li><strong>Chapter 7</strong> typically looks at whether qualifying assets (non-exempt property) might be liquidated by a trustee to pay creditors—a large share of “typical asset” Chapter 7 cases end with retained exempt property depending on exemptions and lien rules.</li>
+                <li><strong>Chapter 13</strong> reorganizes repayment through an approved three- to five-year plan; useful when you’re behind on a mortgage/car and want to cure arrears over time, or when Chapter 7 isn’t available due to prior filings or other factors.</li>
+            </ul>
+            <p>Which chapter fits you depends on income, goals, assets, and prior bankruptcy history—this is a common reason people get a short consult with a lawyer even if they handle most paperwork themselves.</p>
+        </article>
+
+        <article id="before-you-file" class="guide-section" data-keywords="credit counseling certificate course means test budget tax returns pay stubs bank statements transfer asset preferential payment">
+            <h3>Before you file</h3>
+            <ul>
+                <li><strong>Credit counseling</strong> from an approved provider is generally required in the window before filing (keep your certificate for the court).</li>
+                <li><strong>Gather documentation</strong>: tax returns, pay/income records, bank statements, loan statements, collection letters, and a full list of creditors with balances when possible.</li>
+                <li><strong>Be careful with large payments or transfers</strong> right before filing; certain transactions can create questions in your case.</li>
+            </ul>
+            <div class="callout">
+                If you’re close on the <strong>means test</strong> (Chapter 7 income eligibility) or have complicated income, read the official form instructions and consider professional advice—small mistakes can change outcomes.
+            </div>
+        </article>
+
+        <article id="filing-process" class="guide-section" data-keywords="petition schedules voluntary petition filing fee waiver installment clerk proof of claim automatic stay creditor collection lawsuit garnishment">
+            <h3>Filing &amp; the automatic stay</h3>
+            <p>
+                The <strong>petition</strong> starts the case. You’ll file required <strong>schedules</strong> and statements listing debts, property, income, expenses, and financial history.
+                Filing fees (or a fee waiver / installment request where allowed) are handled per court rules.
+            </p>
+            <p>
+                In many cases, filing triggers the <strong>automatic stay</strong>, which can pause certain collection actions while the stay is in effect—there are exceptions (some debts, repeat filings, and other special rules).
+                Creditors may file <strong>proofs of claim</strong> in Chapter 13 (and sometimes in Chapter 7) so the court/trustee can treat their claims consistently.
+            </p>
+        </article>
+
+        <article id="after-filing" class="guide-section" data-keywords="341 meeting meeting of creditors trustee testify id social security amendments discharge financial management course debtor education reaffirmation lien strip">
+            <h3>341 meeting of creditors &amp; discharge</h3>
+            <p>
+                Most filers attend a <strong>341 meeting</strong> (often brief) where the trustee asks questions under oath about the petition and schedules; bring required identification and follow your court’s notice.
+                You must correct accidental errors via <strong>amendments</strong> when needed.
+            </p>
+            <p>
+                Before discharge, filers typically complete a second course: <strong>debtor education / financial management</strong> from an approved provider.
+                A <strong>discharge</strong> is the order that wipes out qualifying debts (many unsecured debts), while some debts—like many taxes, domestic support, and most student loans—often survive unless a separate legal basis applies.
+            </p>
+        </article>
+
+        <article id="misconceptions" class="guide-section" data-keywords="myth secrecy hide assets keep everything lose everything credit score moral failure simple form only">
+            <h3>Common misconceptions</h3>
+            <ul>
+                <li><strong>“I can hide an asset.”</strong> Don’t. Nondisclosure is serious and can lead to denial of discharge or worse.</li>
+                <li><strong>“Bankruptcy fixes every debt.”</strong> Some debts are generally nondischargeable or need separate litigation.</li>
+                <li><strong>“It’s always simple.”</strong> Even “simple” cases have strict rules; local forms and trustee questions still matter.</li>
+            </ul>
+        </article>
+
+        <article id="disclaimer" class="guide-section disclaimer-callout" data-keywords="disclaimer lawyer attorney legal advice not advice education">
+            <h3>Disclaimer</h3>
+            <p>
+                This guide is educational and based on general U.S. consumer bankruptcy themes. It is <strong>not legal advice</strong>, not tailored to your state, court, or facts, and may not reflect recent rule changes.
+                Use official court instructions and, when appropriate, consult a licensed attorney in your jurisdiction.
+            </p>
+        </article>
+
+        <div class="actions">
+            <a href="index.html" class="market-link-btn">Open form assistant</a>
+            <a href="market.html" class="market-link-btn">Find an attorney</a>
+        </div>
+    </main>
+
+    <script>
+        (function () {
+            var input = document.getElementById('guideSearch');
+            var navLinks = document.querySelectorAll('.nav-section a[href^="#"]');
+            var sections = document.querySelectorAll('.guide-section');
+            var navNoResults = document.getElementById('navNoResults');
+
+            function norm(s) {
+                return (s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+            }
+
+            function filter() {
+                var q = norm(input.value);
+                var navVisible = 0;
+                var sectionVisible = 0;
+
+                navLinks.forEach(function (a) {
+                    var target = a.getAttribute('href').slice(1);
+                    var el = document.getElementById(target);
+                    var blob = norm(a.textContent + ' ' + (a.getAttribute('data-keywords') || '') + ' ' + (el && el.getAttribute('data-keywords') ? el.getAttribute('data-keywords') : ''));
+                    var match = !q || blob.indexOf(q) !== -1;
+                    a.classList.toggle('hidden', !match);
+                    if (match) navVisible++;
+
+                    if (el) el.classList.toggle('hidden', !match);
+                    if (el && match) sectionVisible++;
+                });
+
+                navNoResults.classList.toggle('hidden', navVisible !== 0 || q.length === 0);
+            }
+
+            input.addEventListener('input', filter);
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    input.value = '';
+                    filter();
+                    input.blur();
+                }
+            });
+
+            document.querySelectorAll('.nav-section a[href^="#"]').forEach(function (a) {
+                a.addEventListener('click', function () {
+                    if (window.innerWidth <= 800) {
+                        document.querySelector('.main-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+
+            filter();
+        })();
+    </script>
+</body>
+</html>

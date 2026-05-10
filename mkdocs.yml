@@ -1,6 +1,6 @@
 site_name: SuperBroke Guide
 site_description: Documentation for using SuperBroke.
-site_url: https://superbroke.site/guide/
+site_url: https://leonewt0n.github.io/SuperBroke/
 theme:
   name: mkdocs
 docs_dir: docs

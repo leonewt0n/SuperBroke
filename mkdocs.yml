@@ -1,0 +1,9 @@
+site_name: SuperBroke Guide
+site_description: Documentation for using SuperBroke.
+site_url: https://superbroke.site/guide/
+theme:
+  name: mkdocs
+docs_dir: docs
+site_dir: guide
+nav:
+  - Guide: index.md

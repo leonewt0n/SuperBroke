@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bankruptcy Form Assistant</title>
+    <title>SuperBroke - Bankruptcy Form Assistant</title>
     <style>
         :root {
             --bg-main: #f8fafc;
@@ -13,6 +13,7 @@
             --text-primary: #334155;
             --text-secondary: #64748b;
             --border-light: #e2e8f0;
+            --success-green: #059669;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -21,7 +22,6 @@
 
         .document-view { flex: 1; display: flex; flex-direction: column; padding: 1.5rem; }
         
-        /* Updated header to Flexbox for side-by-side layout */
         .header { 
             margin-bottom: 1rem; 
             display: flex; 
@@ -38,7 +38,6 @@
         .header h1 { font-size: 1.5rem; color: var(--brand-dark); }
         .header p { font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.25rem; }
         
-        /* New attractive button styling */
         .market-link-btn {
             display: inline-block;
             padding: 10px 20px;
@@ -51,6 +50,7 @@
             font-size: 0.95rem;
             transition: all 0.2s ease;
             box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+            text-align: center;
         }
 
         .market-link-btn:hover {
@@ -63,20 +63,85 @@
         .pdf-wrapper { flex: 1; background: var(--bg-panel); border-radius: 8px; border: 1px solid var(--border-light); overflow: hidden; }
         embed { width: 100%; height: 100%; border: none; }
 
-        .ai-sidebar { width: 400px; min-width: 350px; background-color: var(--bg-panel); border-left: 1px solid var(--border-light); display: flex; flex-direction: column; }
-        .chat-header { padding: 1.5rem; border-bottom: 1px solid var(--border-light); background-color: var(--brand-dark); color: white; }
-        .chat-header h2 { font-size: 1.1rem; }
-        .chat-header p { font-size: 0.8rem; color: #cbd5e1; margin-top: 4px; }
-        
-        .chat-history { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.25rem; }
-        .msg-bubble { max-width: 85%; padding: 12px 16px; border-radius: 8px; font-size: 0.95rem; line-height: 1.5; }
-        .msg-ai { background-color: var(--bg-main); border: 1px solid var(--border-light); align-self: flex-start; border-bottom-left-radius: 2px; }
-        .msg-user { background-color: var(--accent-blue); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        /* Sidebar Styles */
+        .status-sidebar { 
+            width: 400px; 
+            min-width: 350px; 
+            background-color: var(--bg-panel); 
+            border-left: 1px solid var(--border-light); 
+            display: flex; 
+            flex-direction: column; 
+        }
 
-        .chat-input { padding: 1.5rem; border-top: 1px solid var(--border-light); display: flex; gap: 10px; background-color: var(--bg-panel); }
-        .chat-input input { flex: 1; padding: 12px 16px; border: 1px solid var(--border-light); border-radius: 6px; outline: none; }
-        .chat-input button { padding: 0 20px; background-color: var(--accent-blue); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        .chat-input button:disabled { background-color: #94a3b8; cursor: not-allowed; }
+        .sidebar-header { 
+            padding: 1.5rem; 
+            background-color: var(--brand-dark); 
+            color: white; 
+        }
+        
+        .sidebar-header h2 { font-size: 1.1rem; }
+        .sidebar-header p { font-size: 0.8rem; color: #cbd5e1; margin-top: 4px; }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+            background: #f1f5f9;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-blue);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #progressText {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Checklist Styles */
+        .checklist-history { 
+            flex: 1; 
+            padding: 1.5rem; 
+            overflow-y: auto; 
+        }
+
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .check-item:hover { background: #f8fafc; }
+
+        .check-item input[type="checkbox"] {
+            margin-top: 4px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .check-item span { font-size: 0.9rem; line-height: 1.4; }
+
+        .sidebar-footer { padding: 1.5rem; border-top: 1px solid var(--border-light); }
     </style>
 </head>
 <body>
@@ -85,12 +150,13 @@
         <div class="header">
             <div>
                 <h1>SuperBroke</h1>
-                <p>DIY Bankruptcy...but with AI powered Attorneys.</p>
+                <p>Serverless Secure DIY Bankruptcy Tool.</p>
             </div>
             <div class="header-links">
                 <a href="market.html" class="market-link-btn">Find an Attorney</a>
-                <a href="https://www.pay.gov/public/form/start/808852929" class="market-link-btn">Pay Filling Fee</a>
+                <a href="https://www.pay.gov/public/form/start/808852929" class="market-link-btn">Pay Filing Fee</a>
                 <a href="https://www.wawb.uscourts.gov/content/electronic-filing-option-parties-without-attorney" class="market-link-btn">eFile</a>
+                <a href="guide/" class="market-link-btn">Guide</a>
             </div>
         </div>
         <div class="pdf-wrapper">
@@ -98,133 +164,102 @@
         </div>
     </main>
 
-    <aside class="ai-sidebar">
-        <div class="chat-header">
-            <h2>AI Assistant</h2>
-            <p>I'm here to help you understand your forms.</p>
+    <aside class="status-sidebar">
+        <div class="sidebar-header">
+            <h2>Filing Progress</h2>
+            <p>Minimum Chapter 7 Requirements</p>
         </div>
         
-        <div class="chat-history" id="chatHistory">
-            <div class="msg-bubble msg-ai">
-                Hello. I have loaded Form 101 into my memory. What section are you currently working on?
+        <div class="progress-container">
+            <div class="progress-bar-bg">
+                <div id="progressBar" class="progress-bar-fill"></div>
             </div>
+            <span id="progressText">0% Complete</span>
         </div>
 
-        <div class="chat-input">
-            <input type="text" id="userInput" placeholder="Ask a question about the form...">
-            <button type="button" id="sendBtn">Send</button>
+        <div class="checklist-history">
+            <form id="filingChecklist">
+                <label class="check-item">
+                    <input type="checkbox" data-weight="10">
+                    <span><b>Form 101:</b> Voluntary Petition</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" data-weight="10">
+                    <span><b>Schedules A/B:</b> Property</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" data-weight="10">
+                    <span><b>Schedule C:</b> Exempt Property</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" data-weight="10">
+                    <span><b>Schedules D-F:</b> Creditor Lists</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" data-weight="10">
+                    <span><b>Schedules I/J:</b> Income & Expenses</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" data-weight="10">
+                    <span><b>SOFA:</b> Statement of Financial Affairs</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" data-weight="10">
+                    <span><b>Form 122A-1:</b> Means Test</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" data-weight="15">
+                    <span>Credit Counseling Certificate</span>
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" data-weight="15">
+                    <span>Recent Tax Returns (2 Years)</span>
+                </label>
+            </form>
+        </div>
+
+        <div class="sidebar-footer">
+            <button id="exportBtn" class="market-link-btn" style="width: 100%;">Prepare Filing Packet</button>
         </div>
     </aside>
 
     <script>
-        // State
-        let conversationHistory = [
-            {
-                role: "user",
-                parts: [
-                    { text: "System Instruction: You are a helpful legal AI assistant. Your goal is to help users understand Official Form 101. Do not provide formal legal advice, but explain terminology clearly based on the attached PDF document." }
-                    // We will inject the PDF data here once it loads
-                ]
-            },
-            {
-                role: "model",
-                parts: [{ text: "Understood. I am ready to assist with Form 101." }]
-            }
-        ];
+        document.addEventListener('DOMContentLoaded', () => {
+            const checklist = document.getElementById('filingChecklist');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
 
-        // DOM Elements
-        const chatHistoryContainer = document.getElementById('chatHistory');
-        const chatInput = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
+            const updateProgress = () => {
+                const checkboxes = checklist.querySelectorAll('input[type="checkbox"]');
+                let totalWeight = 0;
+                let completedWeight = 0;
 
-        function appendMessage(text, sender) {
-            const bubble = document.createElement('div');
-            bubble.classList.add('msg-bubble', sender === 'user' ? 'msg-user' : 'msg-ai');
-            bubble.textContent = text;
-            chatHistoryContainer.appendChild(bubble);
-            chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight; 
-        }
-
-        // Helper function to convert the PDF to base64
-        async function loadPdfIntoMemory() {
-            try {
-                sendBtn.disabled = true;
-                chatInput.placeholder = "Loading PDF into AI memory...";
-
-                const response = await fetch('form_b101.pdf');
-                const blob = await response.blob();
-                
-                // Convert blob to base64
-                const reader = new FileReader();
-                reader.readAsDataURL(blob);
-                reader.onloadend = () => {
-                    const base64data = reader.result.split(',')[1];
-                    
-                    // Attach the PDF to the first instruction message
-                    conversationHistory[0].parts.push({
-                        inlineData: {
-                            data: base64data,
-                            mimeType: 'application/pdf'
-                        }
-                    });
-
-                    chatInput.placeholder = "Ask a question about the form...";
-                    sendBtn.disabled = false;
-                }
-            } catch (error) {
-                console.error("Failed to load PDF:", error);
-                chatInput.placeholder = "Failed to load PDF context.";
-            }
-        }
-
-        async function sendMessage() {
-            const text = chatInput.value.trim();
-            if (!text) return;
-
-            // Update UI
-            appendMessage(text, 'user');
-            chatInput.value = '';
-            sendBtn.disabled = true;
-            
-            // Add to state
-            conversationHistory.push({ role: "user", parts: [{ text: text }] });
-
-            try {
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ conversationHistory })
+                checkboxes.forEach(cb => {
+                    const weight = parseInt(cb.getAttribute('data-weight'));
+                    totalWeight += weight;
+                    if (cb.checked) {
+                        completedWeight += weight;
+                    }
                 });
+
+                const percentage = Math.round((completedWeight / totalWeight) * 100);
+                progressBar.style.width = `${percentage}%`;
+                progressText.textContent = `${percentage}% Complete`;
                 
-                const data = await response.json();
-                
-                // Explicitly check for the HTML error payload
-                if (!response.ok) {
-                    throw new Error(data.error || "Server returned an error");
+                if (percentage === 100) {
+                    progressText.textContent = "Ready to File!";
+                    progressText.style.color = "var(--success-green)";
+                } else {
+                    progressText.style.color = "var(--text-primary)";
                 }
+            };
 
-                // Update UI and State with AI response
-                appendMessage(data.reply, 'ai');
-                conversationHistory.push({ role: "model", parts: [{ text: data.reply }] });
-
-            } catch (error) {
-                console.error(error);
-                appendMessage("Sorry, I encountered an error talking to the server.", 'ai');
-                // Remove the failed user message from history so they can try again
-                conversationHistory.pop(); 
-            } finally {
-                sendBtn.disabled = false;
-                chatInput.focus();
-            }
-        }
-
-        sendBtn.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !sendBtn.disabled) sendMessage();
+            // Initialize listener
+            checklist.addEventListener('change', updateProgress);
+            
+            // Optional: Initial calculation if any items are pre-checked
+            updateProgress();
         });
-
-        // Load the PDF into memory as soon as the page loads
-        window.addEventListener('DOMContentLoaded', loadPdfIntoMemory);
     </script>
 </body>
 </html>
